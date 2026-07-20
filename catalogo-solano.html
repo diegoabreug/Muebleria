@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mueblería Solano — Catálogo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --verde-solano:#44a939;
+    --verde-oscuro:#44a939;
+    --rojo-solano:#da080f;
+    --crema:#ffffff;
+    --crema-card:#ffffff;
+    --carbon:#2A2620;
+    --grafito:#6B6558;
+    --linea:#E4DFD1;
+    --cream-text:#fffaea;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--crema);
+    color:var(--carbon);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Inter', sans-serif;
+    font-weight:700;
+  }
+  .mono{ font-family:'Space Mono', monospace; }
+
+  a{ color:inherit; }
+  button{ font-family:inherit; cursor:pointer; }
+
+  /* ===== Layout shell ===== */
+  .app{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* ===== Top bar ===== */
+  .topbar{
+    display:flex;
+    align-items:center;
+    gap:24px;
+    padding:14px 28px;
+    background:var(--crema);
+    border-bottom:2px solid var(--verde-solano);
+    position:sticky;
+    top:0;
+    z-index:40;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-shrink:0;
+  }
+  .brand img{
+    height:46px;
+    width:46px;
+    border-radius:8px;
+    object-fit:cover;
+  }
+  .brand-text .name{
+    font-size:20px;
+    font-weight:600;
+    letter-spacing:0.2px;
+    line-height:1.1;
+    color:var(--verde-oscuro);
+  }
+  .brand-text .tagline{
+    font-family:'Inter', sans-serif;
+    font-style:italic;
+    font-size:12.5px;
+    color:var(--rojo-solano);
+    letter-spacing:0.2px;
+  }
+
+  .searchwrap{
+    flex:1;
+    max-width:560px;
+    position:relative;
+  }
+  .searchwrap input{
+    width:100%;
+    padding:11px 16px 11px 42px;
+    border-radius:999px;
+    border:1.5px solid var(--linea);
+    background:#fff;
+    font-size:14.5px;
+    color:var(--carbon);
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .searchwrap input:focus{ border-color:var(--verde-solano); }
+  .searchwrap svg{
+    position:absolute;
+    left:15px; top:50%;
+    transform:translateY(-50%);
+    width:16px; height:16px;
+    stroke:var(--grafito);
+  }
+
+  .topbar-meta{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-shrink:0;
+    font-size:12.5px;
+    color:var(--grafito);
+    text-align:right;
+    max-width:190px;
+    line-height:1.35;
+  }
+
+  /* ===== Body: sidebar + main ===== */
+  .body{
+    flex:1;
+    display:flex;
+    align-items:stretch;
+  }
+
+  .sidebar{
+    width:250px;
+    flex-shrink:0;
+    background:var(--verde-oscuro);
+    color:var(--cream-text);
+    padding:26px 0 40px;
+    position:sticky;
+    top:75px;
+    align-self:flex-start;
+    height:calc(100vh - 75px);
+    overflow-y:auto;
+  }
+  .sidebar-eyebrow{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:#ffffff;
+    padding:0 24px 14px;
+  }
+  .cat-list{
+    list-style:none;
+    margin:0; padding:0;
+  }
+  .cat-item button{
+    all:unset;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    width:100%;
+    padding:11px 24px;
+    font-size:14.5px;
+    color:var(--cream-text);
+    border-left:3px solid transparent;
+    transition:background .12s ease, border-color .12s ease;
+  }
+  .cat-item button:hover{ background:rgba(255,255,255,0.06); }
+  .cat-item.active button{
+    background:rgba(255,255,255,0.08);
+    border-left-color:var(--rojo-solano);
+    font-weight:600;
+  }
+  .cat-item .count{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    color:#9FC6AC;
+  }
+  .cat-item.active .count{ color:#F3C7C3; }
+
+  .sidebar-note{
+    margin:22px 24px 0;
+    padding-top:18px;
+    border-top:1px solid rgba(255,255,255,0.14);
+    font-size:12px;
+    line-height:1.55;
+    color:#ffffff;
+  }
+
+  /* ===== Main ===== */
+  main{
+    flex:1;
+    padding:34px 40px 60px;
+    min-width:0;
+  }
+  .crumbs{
+    font-size:12.5px;
+    color:var(--grafito);
+    margin-bottom:6px;
+  }
+  .crumbs .sep{ margin:0 6px; color:var(--linea); }
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:22px;
+    flex-wrap:wrap;
+  }
+  .section-head h2{
+    font-size:30px;
+    font-weight:600;
+    margin:0;
+    color:var(--verde-oscuro);
+  }
+  .section-head .result-count{
+    font-family:'Space Mono', monospace;
+    font-size:12.5px;
+    color:var(--grafito);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+    gap:22px;
+  }
+
+  .card{
+    background:var(--crema-card);
+    border:1px solid var(--linea);
+    border-radius:10px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    cursor:pointer;
+  }
+  .card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 10px 24px rgba(18,51,34,0.10);
+    border-color:var(--verde-solano);
+  }
+  .card-art{
+    position:relative;
+    aspect-ratio:1/0.86;
+    background:
+      linear-gradient(var(--linea) 1px, transparent 1px) 0 0/100% 20px,
+      linear-gradient(90deg, var(--linea) 1px, transparent 1px) 0 0/20px 100%,
+      #FBFAF3;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .card-art svg{ width:64%; height:64%; }
+  .badge-new{
+    position:absolute;
+    top:9px; left:9px;
+    background:var(--rojo-solano);
+    color:#fff;
+    font-family:'Space Mono', monospace;
+    font-size:9.5px;
+    letter-spacing:0.5px;
+    padding:3px 7px;
+    border-radius:4px;
+    text-transform:uppercase;
+  }
+  .dims-chip{
+    position:absolute;
+    bottom:8px; right:8px;
+    background:rgba(42,38,32,0.88);
+    color:#F3ECD9;
+    font-family:'Space Mono', monospace;
+    font-size:10.5px;
+    padding:4px 8px;
+    border-radius:5px;
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+  .dims-chip svg{ width:11px; height:11px; }
+
+  .card-body{
+    padding:14px 16px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    flex:1;
+  }
+  .card-cat{
+    font-family:'Space Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    color:var(--verde-solano);
+  }
+  .card-title{
+    font-size:16.5px;
+    font-weight:600;
+    line-height:1.25;
+    color:var(--carbon);
+  }
+  .card-desc{
+    font-size:12.8px;
+    color:var(--grafito);
+    line-height:1.4;
+    flex:1;
+  }
+  .card-footer{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:6px;
+  }
+  .ficha-link{
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--rojo-solano);
+    display:flex;
+    align-items:center;
+    gap:4px;
+  }
+  .ficha-link svg{ width:13px; height:13px; }
+  .avail-dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--verde-solano);
+    display:inline-block;
+  }
+
+  .empty-state{
+    padding:60px 20px;
+    text-align:center;
+    color:var(--grafito);
+  }
+  .empty-state .display{ font-size:22px; color:var(--verde-oscuro); margin-bottom:6px; }
+
+  /* ===== Modal ===== */
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(18,20,15,0.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:100;
+    padding:24px;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal{
+    background:var(--crema-card);
+    max-width:880px;
+    width:100%;
+    max-height:88vh;
+    overflow-y:auto;
+    border-radius:14px;
+    display:grid;
+    grid-template-columns:1.1fr 1fr;
+    position:relative;
+  }
+  .modal-close{
+    all:unset;
+    position:absolute;
+    top:14px; right:14px;
+    width:32px; height:32px;
+    border-radius:50%;
+    background:#fff;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.12);
+    z-index:5;
+  }
+  .modal-close svg{ width:15px; height:15px; }
+  .modal-art{
+    background:
+      linear-gradient(var(--linea) 1px, transparent 1px) 0 0/28px 28px,
+      linear-gradient(90deg, var(--linea) 1px, transparent 1px) 0 0/28px 28px,
+      #FBFAF3;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px;
+    position:relative;
+  }
+  .modal-art svg{ width:82%; height:82%; }
+  .modal-info{
+    padding:38px 34px 34px 28px;
+    display:flex;
+    flex-direction:column;
+  }
+  .modal-info .card-cat{ margin-bottom:8px; }
+  .modal-info h3{
+    font-size:26px;
+    font-weight:600;
+    color:var(--verde-oscuro);
+    margin:0 0 14px;
+    line-height:1.2;
+  }
+  .spec-table{
+    border-top:1px solid var(--linea);
+    margin-top:6px;
+  }
+  .spec-row{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:10px 0;
+    border-bottom:1px solid var(--linea);
+    font-size:13.5px;
+  }
+  .spec-row .k{ color:var(--grafito); }
+  .spec-row .v{ font-family:'Space Mono', monospace; font-weight:700; color:var(--carbon); text-align:right; }
+  .modal-desc{
+    font-size:13.8px;
+    line-height:1.6;
+    color:var(--carbon);
+    margin:16px 0 0;
+  }
+  .modal-cta{
+    margin-top:auto;
+    padding-top:20px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .btn{
+    all:unset;
+    padding:11px 18px;
+    border-radius:8px;
+    font-size:13.5px;
+    font-weight:600;
+    text-align:center;
+  }
+  .btn-primary{ background:var(--verde-solano); color:#fff; }
+  .btn-ghost{ border:1.5px solid var(--linea); color:var(--carbon); }
+  .btn:hover{ opacity:0.92; }
+
+  /* ===== Footer ===== */
+  footer{
+    background:var(--verde-oscuro);
+    color:#B9D3C0;
+    padding:26px 40px;
+    font-size:12.5px;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  footer .fnote{ font-family:'Space Mono', monospace; }
+
+  /* ===== Responsive ===== */
+  @media (max-width:860px){
+    .body{ flex-direction:column; }
+    .sidebar{
+      width:100%;
+      position:static;
+      height:auto;
+      padding:16px 0 10px;
+    }
+    .cat-list{ display:flex; overflow-x:auto; gap:2px; padding:0 14px; }
+    .cat-item button{ white-space:nowrap; border-left:none; border-bottom:3px solid transparent; padding:9px 14px; }
+    .cat-item.active button{ border-bottom-color:var(--rojo-solano); }
+    .sidebar-eyebrow, .sidebar-note{ display:none; }
+    main{ padding:24px 18px 50px; }
+    .topbar{ padding:12px 16px; gap:12px; }
+    .topbar-meta{ display:none; }
+    .modal{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ================= TOP BAR ================= -->
+  <header class="topbar">
+    <div class="brand">
+      <img src="Untitled design.png" alt="Mueblería Solano">
+      <div class="brand-text">
+        <div class="name">MUEBLERÍA SOLANO</div>
+        <div class="tagline">La Casa de tu Confianza</div>
+      </div>
+    </div>
+    <div class="searchwrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="searchInput" type="text" placeholder="Buscar en el catálogo — ej. nevera, sofá, lavadora…">
+    </div>
+    <!-- <div class="topbar-meta">Catálogo digital — medidas y ficha técnica de cada artículo</div> -->
+  </header>
+
+  <div class="body">
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="sidebar">
+      <div class="sidebar-eyebrow">Categorías</div>
+      <ul class="cat-list" id="catList"></ul>
+      <div class="sidebar-note">
+        
+        
+        
+        Propuesta de catálogo — sin precios visibles. Cada artículo muestra medidas, materiales y disponibilidad para orientar al cliente en tienda.
+      </div>
+    </aside>
+
+    <!-- ================= MAIN ================= -->
+    <main>
+      <div class="crumbs">Inicio <span class="sep">›</span> <span id="crumbCat">Catálogo</span></div>
+      <div class="section-head">
+        <h2 id="sectionTitle">Todo el catálogo</h2>
+        <div class="result-count" id="resultCount"></div>
+      </div>
+      <div class="grid" id="productGrid"></div>
+    </main>
+
+  </div>
+
+  <footer>
+    <div>© 2026 Mueblería Solano — Propuesta de sitio web, uso interno.</div>
+    <div class="fnote">DEMO / SIN PRECIOS · V0.1</div>
+  </footer>
+</div>
+
+<!-- ================= MODAL ================= -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#2A2620" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="modal-art" id="modalArt"></div>
+    <div class="modal-info" id="modalInfo"></div>
+  </div>
+</div>
+
+<script>
+const CATEGORIES = [
+  { slug:'muebles',    name:'Muebles' },
+  { slug:'comedores',  name:'Comedores' },
+  { slug:'estufas',    name:'Estufas' },
+  { slug:'neveras',    name:'Neveras' },
+  { slug:'abanicos',   name:'Abanicos' },
+  { slug:'ac',         name:'Aires Acondicionados' },
+  { slug:'airfryer',   name:'Air Fryer' },
+  { slug:'licuadoras', name:'Licuadoras' },
+  { slug:'lavadoras',  name:'Lavadoras' },
+  { slug:'secadoras',  name:'Secadoras' },
+];
+
+const PRODUCTS = [
+
+  // ===== MUEBLES =====
+  { id:'mb1', cat:'muebles', icon:'sofa', name:'Sofá Reclinable 3 Puestos Milano', dims:'198 × 92 × 100 cm', material:'Tapizado en piel sintética, estructura de madera de pino', colors:['Gris grafito','Café espresso','Negro'], desc:'Sofá reclinable de tres puestos con mecanismo manual, ideal para salas medianas. Costuras reforzadas y espuma de alta densidad.', avail:'En stock', warranty:'12 meses' },
+  { id:'mb2', cat:'muebles', icon:'sofa', name:'Sofá Seccional Chaise Roma', dims:'260 × 160 × 88 cm', material:'Tela chenille antimanchas, base de madera tratada', colors:['Beige','Azul petróleo'], desc:'Sección en L con chaise reversible, pensado para espacios abiertos y familias grandes.', avail:'Últimas unidades', warranty:'12 meses' },
+  { id:'mb3', cat:'muebles', icon:'sofa', name:'Love Seat Reclinable Toscana', dims:'150 × 90 × 100 cm', material:'Piel sintética premium', colors:['Camel','Gris perla'], desc:'Dos puestos reclinables individuales, apoyabrazos acolchado y portavasos integrado.', avail:'En stock', warranty:'12 meses' },
+  { id:'mb4', cat:'muebles', icon:'silla', name:'Sillón Individual Wing Bergamo', dims:'86 × 88 × 105 cm', material:'Tela lino, patas de madera maciza', colors:['Verde botella','Mostaza','Terracota'], desc:'Sillón de orejas estilo clásico, respaldo alto y patas torneadas.', avail:'En stock', warranty:'6 meses' },
+  { id:'mb5', cat:'muebles', icon:'cama', name:'Cama Tapizada Queen Verona', dims:'160 × 200 × 120 cm', material:'Tapizado en boucle, cabecera capitoné', colors:['Crema','Gris topo'], desc:'Base cama con cabecera capitoné, incluye laminado de soporte. No incluye colchón.', avail:'En stock', warranty:'12 meses' },
+  { id:'mb6', cat:'muebles', icon:'sofa', name:'Mesa de Centro Rústica Nogal', dims:'110 × 60 × 45 cm', material:'Madera de nogal maciza, base de hierro forjado', colors:['Nogal natural'], desc:'Mesa de centro rectangular con veta natural visible y acabado mate.', avail:'En stock', warranty:'6 meses' },
+  { id:'mb7', cat:'muebles', icon:'sofa', name:'Estante Modular Firenze', dims:'90 × 30 × 180 cm', material:'MDF laminado, herrajes metálicos', colors:['Blanco','Wengué'], desc:'Estantería modular de 5 niveles para sala o estudio, fácil ensamblaje.', avail:'En stock', warranty:'6 meses' },
+  { id:'mb8', cat:'muebles', icon:'cama', name:'Butaca Giratoria Verona', dims:'75 × 78 × 95 cm', material:'Terciopelo, base giratoria de metal', colors:['Azul noche','Rosa palo'], desc:'Butaca giratoria 360°, ideal como pieza de acento.', avail:'En stock', warranty:'6 meses' },
+
+  // ===== COMEDORES =====
+  { id:'cm1', cat:'comedores', icon:'dining', name:'Juego de Comedor 6 Sillas Toledo', dims:'180 × 90 × 76 cm (mesa)', material:'Mesa MDF laminado, sillas tapizadas', colors:['Nogal / Beige'], desc:'Set completo para 6 personas, sillas con respaldo ergonómico tapizado.', avail:'En stock', warranty:'12 meses' },
+  { id:'cm2', cat:'comedores', icon:'dining', name:'Mesa de Comedor Extensible Sevilla', dims:'160–200 × 90 × 75 cm', material:'Madera de haya maciza', colors:['Miel','Wengué'], desc:'Extensión central para hasta 4 comensales adicionales.', avail:'En stock', warranty:'12 meses' },
+  { id:'cm3', cat:'comedores', icon:'silla', name:'Silla Comedor Tapizada Alba', dims:'46 × 54 × 88 cm', material:'Tela boucle, patas de madera', colors:['Crudo','Gris claro'], desc:'Silla de comedor con respaldo curvo y relleno de espuma firme.', avail:'En stock', warranty:'6 meses' },
+  { id:'cm4', cat:'comedores', icon:'dining', name:'Bar Set Alto Capri (mesa + 2 sillas)', dims:'70 × 70 × 105 cm', material:'Metal pintado, tapa de madera', colors:['Negro mate'], desc:'Set alto tipo bar, ideal para cocinas americanas o balcones.', avail:'Últimas unidades', warranty:'6 meses' },
+  { id:'cm5', cat:'comedores', icon:'dining', name:'Vitrina Comedor Granada', dims:'110 × 40 × 190 cm', material:'MDF laminado, puertas de vidrio templado', colors:['Blanco','Nogal'], desc:'Vitrina con 3 niveles de exhibición y compartimento inferior cerrado.', avail:'En stock', warranty:'12 meses' },
+  { id:'cm6', cat:'comedores', icon:'dining', name:'Mesa Comedor Redonda Marbella', dims:'Ø120 × 75 cm', material:'Madera maciza, base pedestal', colors:['Nogal natural'], desc:'Mesa redonda para 4–5 personas, base pedestal central.', avail:'En stock', warranty:'12 meses' },
+  { id:'cm7', cat:'comedores', icon:'silla', name:'Silla Bar Andrea', dims:'48 × 52 × 95.5 cm', material:'Tapizado en tela, base metálica negra', colors:['Beige','Gris'], desc:'Silla alta tipo taburete con respaldo, estructura metálica reforzada.', avail:'En stock', warranty:'6 meses' },
+  { id:'cm8', cat:'comedores', icon:'dining', name:'Buffet Comedor Oporto', dims:'140 × 45 × 85 cm', material:'MDF laminado', colors:['Blanco','Gris grafito'], desc:'Buffet con 3 gavetas y 2 puertas, superficie para vajilla o decoración.', avail:'En stock', warranty:'12 meses' },
+
+  // ===== ESTUFAS =====
+  { id:'es1', cat:'estufas', icon:'estufa', name:'Estufa 4 Hornillas Inox Titan', dims:'50 × 60 × 85 cm', material:'Acero inoxidable, rejillas de hierro fundido', colors:['Inox'], desc:'Estufa a gas con horno integrado y encendido electrónico.', avail:'En stock', warranty:'12 meses' },
+  { id:'es2', cat:'estufas', icon:'estufa', name:'Estufa a Gas 5 Hornillas Vulcano', dims:'60 × 60 × 90 cm', material:'Cubierta de vidrio templado', colors:['Negro'], desc:'Quinta hornilla central de alta potencia, horno con función grill.', avail:'En stock', warranty:'12 meses' },
+  { id:'es3', cat:'estufas', icon:'estufa', name:'Cocina Integral 6 Hornillas Everest', dims:'75 × 65 × 90 cm', material:'Acero inoxidable', colors:['Inox'], desc:'Cocina de gran capacidad pensada para uso familiar intensivo.', avail:'Últimas unidades', warranty:'18 meses' },
+  { id:'es4', cat:'estufas', icon:'estufa', name:'Estufa Compacta 2 Hornillas Aria', dims:'35 × 50 × 45 cm', material:'Acero pintado', colors:['Blanco'], desc:'Ideal para apartaestudios y cocinas pequeñas, sin horno.', avail:'En stock', warranty:'6 meses' },
+  { id:'es5', cat:'estufas', icon:'estufa', name:'Estufa Eléctrica Vitrocerámica Zenit', dims:'55 × 58 × 88 cm', material:'Superficie vitrocerámica', colors:['Negro'], desc:'Control táctil y horno eléctrico con función de convección.', avail:'En stock', warranty:'12 meses' },
+  { id:'es6', cat:'estufas', icon:'estufa', name:'Cocina Industrial 6 Hornillas Pro Chef', dims:'90 × 70 × 95 cm', material:'Acero inoxidable grado industrial', colors:['Inox'], desc:'Pensada para uso semi-comercial, hornillas de alta potencia.', avail:'En stock', warranty:'18 meses' },
+
+  // ===== NEVERAS =====
+  { id:'nv1', cat:'neveras', icon:'nevera', name:'Nevera Side by Side Glacial 20p3', dims:'90 × 70 × 178 cm', material:'Acero inoxidable', colors:['Inox'], desc:'20 pies cúbicos, dispensador de agua y hielo en puerta.', avail:'En stock', warranty:'12 meses' },
+  { id:'nv2', cat:'neveras', icon:'nevera', name:'Refrigerador Top Freezer Ártico 14p3', dims:'70 × 68 × 168 cm', material:'Acero pintado', colors:['Blanco','Inox'], desc:'Congelador superior, entrepaños de vidrio templado.', avail:'En stock', warranty:'12 meses' },
+  { id:'nv3', cat:'neveras', icon:'nevera', name:'Nevera French Door Boreal 22p3', dims:'92 × 72 × 180 cm', material:'Acero inoxidable', colors:['Inox'], desc:'Doble puerta francesa con cajón inferior congelador.', avail:'Últimas unidades', warranty:'12 meses' },
+  { id:'nv4', cat:'neveras', icon:'nevera', name:'Refrigerador Compacto Frost 7p3', dims:'50 × 55 × 125 cm', material:'Acero pintado', colors:['Blanco','Negro'], desc:'Ideal para apartaestudios, oficinas o segunda nevera.', avail:'En stock', warranty:'6 meses' },
+  { id:'nv5', cat:'neveras', icon:'nevera', name:'Nevera No Frost Nórdica 16p3', dims:'75 × 70 × 172 cm', material:'Acero pintado', colors:['Inox','Blanco'], desc:'Tecnología No Frost, congelador inferior con gavetas.', avail:'En stock', warranty:'12 meses' },
+  { id:'nv6', cat:'neveras', icon:'nevera', name:'Congelador Horizontal Polar 10p3', dims:'110 × 60 × 85 cm', material:'Acero pintado', colors:['Blanco'], desc:'Congelador horizontal con canasta removible, ideal para negocio o casa.', avail:'En stock', warranty:'12 meses' },
+
+  // ===== ABANICOS =====
+  { id:'ab1', cat:'abanicos', icon:'abanico', name:'Abanico de Pie Turbo Viento 18"', dims:'45 × 45 × 130 cm', material:'Aspas de plástico ABS, base metálica', colors:['Negro','Blanco'], desc:'3 velocidades, oscilación 90° y altura ajustable.', avail:'En stock', warranty:'6 meses' },
+  { id:'ab2', cat:'abanicos', icon:'abanico', name:'Abanico de Techo Brisa 52"', dims:'Ø132 × 40 cm', material:'Aspas de madera tratada, motor de cobre', colors:['Nogal / Bronce'], desc:'Incluye luz LED integrada y control remoto.', avail:'En stock', warranty:'12 meses' },
+  { id:'ab3', cat:'abanicos', icon:'abanico', name:'Abanico de Torre Slim Air', dims:'26 × 26 × 95 cm', material:'Plástico ABS', colors:['Negro','Blanco'], desc:'Diseño de torre delgada, ideal para espacios reducidos, con temporizador.', avail:'En stock', warranty:'6 meses' },
+  { id:'ab4', cat:'abanicos', icon:'abanico', name:'Abanico Industrial Ventisca 24"', dims:'60 × 60 × 70 cm', material:'Aspas metálicas, rejilla reforzada', colors:['Gris industrial'], desc:'Alto flujo de aire, pensado para talleres, negocios y patios.', avail:'En stock', warranty:'12 meses' },
+  { id:'ab5', cat:'abanicos', icon:'abanico', name:'Mini Abanico de Mesa Fresco 10"', dims:'26 × 26 × 34 cm', material:'Plástico ABS', colors:['Blanco','Azul'], desc:'Compacto para escritorio, dos velocidades, bajo consumo.', avail:'En stock', warranty:'3 meses' },
+  { id:'ab6', cat:'abanicos', icon:'abanico', name:'Abanico de Pared Orbita 16"', dims:'40 × 40 × 45 cm', material:'Plástico ABS, soporte metálico', colors:['Blanco'], desc:'Montaje en pared con oscilación e inclinación ajustable.', avail:'En stock', warranty:'6 meses' },
+
+  // ===== AIRES ACONDICIONADOS =====
+  { id:'ac1', cat:'ac', icon:'ac', name:'Split Inverter Polar 12000 BTU', dims:'85 × 20 × 30 cm (unidad interior)', material:'Carcasa plástica ABS', colors:['Blanco'], desc:'Tecnología Inverter, bajo consumo, ideal para habitaciones hasta 15 m².', avail:'En stock', warranty:'12 meses' },
+  { id:'ac2', cat:'ac', icon:'ac', name:'Split 18000 BTU Glacial Pro', dims:'95 × 22 × 32 cm (unidad interior)', material:'Carcasa plástica ABS', colors:['Blanco'], desc:'Cubre espacios de hasta 22 m², filtro purificador incluido.', avail:'En stock', warranty:'12 meses' },
+  { id:'ac3', cat:'ac', icon:'ac', name:'A/C Ventana Nórdico 10000 BTU', dims:'46 × 53 × 36 cm', material:'Carcasa metálica', colors:['Blanco'], desc:'Instalación en ventana, control mecánico, ideal para cuartos pequeños.', avail:'Últimas unidades', warranty:'6 meses' },
+  { id:'ac4', cat:'ac', icon:'ac', name:'Split Inverter Tundra 24000 BTU', dims:'103 × 24 × 33 cm (unidad interior)', material:'Carcasa plástica ABS', colors:['Blanco'], desc:'Para espacios de hasta 30 m², modo turbo y control por Wi-Fi.', avail:'En stock', warranty:'12 meses' },
+  { id:'ac5', cat:'ac', icon:'ac', name:'Minisplit Cassette Ártico 36000 BTU', dims:'84 × 84 × 26 cm (unidad techo)', material:'Carcasa metálica', colors:['Blanco'], desc:'Instalación en techo tipo cassette, ideal para locales comerciales.', avail:'En stock', warranty:'18 meses' },
+
+  // ===== AIR FRYER =====
+  { id:'af1', cat:'airfryer', icon:'airfryer', name:'Air Fryer Digital 5.5L CrispPro', dims:'32 × 32 × 34 cm', material:'Plástico ABS, canasta antiadherente', colors:['Negro'], desc:'Panel digital con 8 programas preestablecidos.', avail:'En stock', warranty:'6 meses' },
+  { id:'af2', cat:'airfryer', icon:'airfryer', name:'Air Fryer Doble Canasta DualCook', dims:'36 × 30 × 32 cm', material:'Plástico ABS', colors:['Negro'], desc:'Dos canastas independientes para cocinar dos alimentos a la vez.', avail:'En stock', warranty:'6 meses' },
+  { id:'af3', cat:'airfryer', icon:'airfryer', name:'Air Fryer Horno 12L MultiChef', dims:'40 × 36 × 38 cm', material:'Acero inoxidable, puerta de vidrio', colors:['Inox'], desc:'Función horno + freidora de aire, incluye bandeja y rejilla.', avail:'En stock', warranty:'12 meses' },
+  { id:'af4', cat:'airfryer', icon:'airfryer', name:'Air Fryer Compacta 3L QuickCrisp', dims:'24 × 24 × 28 cm', material:'Plástico ABS', colors:['Blanco','Negro'], desc:'Tamaño compacto ideal para 1–2 personas, control manual.', avail:'En stock', warranty:'3 meses' },
+
+  // ===== LICUADORAS =====
+  { id:'lc1', cat:'licuadoras', icon:'licuadora', name:'Licuadora Vaso Vidrio Turbo 900W', dims:'20 × 18 × 38 cm', material:'Vaso de vidrio, cuchillas de acero inoxidable', colors:['Negro'], desc:'3 velocidades más pulso, vaso de 1.5L resistente a altas temperaturas.', avail:'En stock', warranty:'6 meses' },
+  { id:'lc2', cat:'licuadoras', icon:'licuadora', name:'Licuadora Industrial PowerMix 1200W', dims:'22 × 20 × 45 cm', material:'Vaso policarbonato, base metálica', colors:['Gris'], desc:'Motor de alto torque para hielo y preparaciones espesas.', avail:'En stock', warranty:'12 meses' },
+  { id:'lc3', cat:'licuadoras', icon:'licuadora', name:'Licuadora Personal ShakeGo', dims:'12 × 12 × 32 cm', material:'Vaso plástico tipo tumbler', colors:['Verde','Negro'], desc:'Incluye vaso portátil con tapa para llevar, ideal batidos individuales.', avail:'En stock', warranty:'3 meses' },
+  { id:'lc4', cat:'licuadoras', icon:'licuadora', name:'Licuadora 3 en 1 MultiBlend', dims:'20 × 20 × 40 cm', material:'Vaso de vidrio + accesorio picador', colors:['Negro'], desc:'Incluye vaso licuador, picadora y molino para especias.', avail:'En stock', warranty:'6 meses' },
+
+  // ===== LAVADORAS =====
+  { id:'lv1', cat:'lavadoras', icon:'lavadora', name:'Lavadora Automática 18kg CleanMax', dims:'68 × 68 × 105 cm', material:'Carcasa metálica esmaltada', colors:['Blanco'], desc:'Carga superior, 10 programas de lavado, tina de acero inoxidable.', avail:'En stock', warranty:'12 meses' },
+  { id:'lv2', cat:'lavadoras', icon:'lavadora', name:'Lavadora Carga Frontal EcoWash 16kg', dims:'60 × 63 × 85 cm', material:'Carcasa metálica esmaltada', colors:['Blanco'], desc:'Bajo consumo de agua y energía, puerta con visor.', avail:'En stock', warranty:'12 meses' },
+  { id:'lv3', cat:'lavadoras', icon:'lavadora', name:'Lavadora Doble Tina DualWash 22kg', dims:'80 × 45 × 95 cm', material:'Plástico reforzado', colors:['Gris','Blanco'], desc:'Tina de lavado y tina de centrifugado independientes.', avail:'Últimas unidades', warranty:'6 meses' },
+  { id:'lv4', cat:'lavadoras', icon:'lavadora', name:'Lavadora Compacta SmartWash 12kg', dims:'55 × 55 × 90 cm', material:'Carcasa metálica esmaltada', colors:['Blanco'], desc:'Ideal para apartamentos, carga superior, 6 programas.', avail:'En stock', warranty:'6 meses' },
+
+  // ===== SECADORAS =====
+  { id:'sc1', cat:'secadoras', icon:'secadora', name:'Secadora Eléctrica 18kg DrySoft', dims:'68 × 68 × 100 cm', material:'Carcasa metálica esmaltada', colors:['Blanco'], desc:'Sensor de humedad y ciclo antiarrugas.', avail:'En stock', warranty:'12 meses' },
+  { id:'sc2', cat:'secadoras', icon:'secadora', name:'Secadora a Gas TurboDry 20kg', dims:'70 × 70 × 102 cm', material:'Carcasa metálica esmaltada', colors:['Blanco'], desc:'Mayor eficiencia energética que los modelos eléctricos equivalentes.', avail:'En stock', warranty:'12 meses' },
+  { id:'sc3', cat:'secadoras', icon:'secadora', name:'Secadora Compacta QuickDry 12kg', dims:'55 × 55 × 88 cm', material:'Carcasa metálica esmaltada', colors:['Blanco'], desc:'Tamaño compacto apilable con la lavadora SmartWash.', avail:'En stock', warranty:'6 meses' },
+  { id:'sc4', cat:'secadoras', icon:'secadora', name:'Secadora con Sensor Humedad AirFlow 16kg', dims:'62 × 62 × 95 cm', material:'Carcasa metálica esmaltada', colors:['Blanco','Gris'], desc:'8 programas automáticos según tipo de tela.', avail:'En stock', warranty:'12 meses' },
+];
+
+</script>
+<script>
+// Blueprint-style line-art icons per category.
+// All icons share the same stroke language: graphite body lines, red dimension marks.
+const ICONS = {
+
+  sofa: `<svg viewBox="0 0 120 100" fill="none" stroke="#6B6558" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 55 V38 a8 8 0 0 1 8-8 h76 a8 8 0 0 1 8 8 v17"/>
+    <path d="M10 55 h100 v20 a6 6 0 0 1-6 6 H16 a6 6 0 0 1-6-6 Z"/>
+    <path d="M14 60 v14 M106 60 v14"/>
+    <path d="M30 42 v13 M60 42 v13 M90 42 v13"/>
+    <path d="M18 81 v7 M30 81 v9 M90 81 v9 M102 81 v7"/>
+    <g stroke="#C8322A" stroke-width="1.4">
+      <path d="M10 92 h100 M10 89 v6 M110 89 v6"/>
+    </g>
+  </svg>`,
+
+  dining: `<svg viewBox="0 0 120 100" fill="none" stroke="#6B6558" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="60" cy="38" rx="46" ry="12"/>
+    <path d="M22 40 v6 M98 40 v6 M60 26 v24"/>
+    <path d="M28 63 l-6 24 M92 63 l6 24 M45 66 l-3 24 M75 66 l3 24"/>
+    <path d="M14 55 v10 a6 6 0 0 0 6 6 h6 M100 55 v10 a6 6 0 0 1-6 6 h-6"/>
+    <g stroke="#C8322A" stroke-width="1.4">
+      <path d="M14 12 h92 M14 9 v6 M106 9 v6"/>
+    </g>
+  </svg>`,
+
+  estufa: `<svg viewBox="0 0 100 100" fill="none" stroke="#6B6558" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="18" y="20" width="64" height="60" rx="4"/>
+    <circle cx="34" cy="36" r="8"/>
+    <circle cx="66" cy="36" r="8"/>
+    <circle cx="34" cy="58" r="8" stroke-dasharray="0"/>
+    <circle cx="66" cy="58" r="8"/>
+    <rect x="30" y="72" width="40" height="1" opacity="0"/>
+    <path d="M18 80 h64" />
+    <g stroke="#C8322A" stroke-width="1.4">
+      <path d="M10 20 v60 M7 20 h6 M7 80 h6"/>
+    </g>
+  </svg>`,
+
+  nevera: `<svg viewBox="0 0 100 100" fill="none" stroke="#6B6558" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="26" y="10" width="48" height="82" rx="5"/>
+    <path d="M26 40 h48"/>
+    <path d="M36 18 v14 M36 48 v14"/>
+    <g stroke="#C8322A" stroke-width="1.4">
+      <path d="M80 10 v82 M77 10 h6 M77 92 h6"/>
+    </g>
+  </svg>`,
+
+  abanico: `<svg viewBox="0 0 100 100" fill="none" stroke="#6B6558" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="50" cy="38" r="26"/>
+    <circle cx="50" cy="38" r="5"/>
+    <path d="M50 38 L50 16 M50 38 L69 50 M50 38 L31 50"/>
+    <path d="M50 64 v18 M36 90 h28"/>
+    <g stroke="#C8322A" stroke-width="1.4">
+      <path d="M24 38 h-8 M16 35 v6"/>
+      <path d="M76 38 h8 M84 35 v6"/>
+    </g>
+  </svg>`,
+
+  ac: `<svg viewBox="0 0 120 100" fill="none" stroke="#6B6558" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="12" y="30" width="96" height="30" rx="6"/>
+    <path d="M24 44 h30 M24 50 h24 M62 40 h34 M62 46 h30 M62 52 h22"/>
+    <g stroke="#C8322A" stroke-width="1.4">
+      <path d="M12 68 h96 M12 65 v6 M108 65 v6"/>
+    </g>
+  </svg>`,
+
+  airfryer: `<svg viewBox="0 0 100 100" fill="none" stroke="#6B6558" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M28 22 h44 a6 6 0 0 1 6 6 v46 a10 10 0 0 1-10 10 H32 a10 10 0 0 1-10-10 V28 a6 6 0 0 1 6-6 Z"/>
+    <circle cx="50" cy="40" r="10"/>
+    <path d="M40 60 h20 M42 68 h16"/>
+    <g stroke="#C8322A" stroke-width="1.4">
+      <path d="M28 88 h44 M28 85 v6 M72 85 v6"/>
+    </g>
+  </svg>`,
+
+  licuadora: `<svg viewBox="0 0 80 100" fill="none" stroke="#6B6558" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M28 10 h24 l6 44 h-36 Z"/>
+    <path d="M22 54 h36 v18 a8 8 0 0 1-8 8 H30 a8 8 0 0 1-8-8 Z"/>
+    <path d="M28 22 h24 M26 34 h28"/>
+    <g stroke="#C8322A" stroke-width="1.4">
+      <path d="M10 10 v70 M7 10 h6 M7 80 h6"/>
+    </g>
+  </svg>`,
+
+  lavadora: `<svg viewBox="0 0 100 100" fill="none" stroke="#6B6558" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="18" y="10" width="64" height="80" rx="6"/>
+    <path d="M18 24 h64"/>
+    <circle cx="50" cy="58" r="22"/>
+    <circle cx="50" cy="58" r="14"/>
+    <circle cx="28" cy="17" r="2.4"/>
+    <circle cx="38" cy="17" r="2.4"/>
+    <g stroke="#C8322A" stroke-width="1.4">
+      <path d="M10 10 v80 M7 10 h6 M7 90 h6"/>
+    </g>
+  </svg>`,
+
+  secadora: `<svg viewBox="0 0 100 100" fill="none" stroke="#6B6558" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="18" y="10" width="64" height="80" rx="6"/>
+    <path d="M18 24 h64"/>
+    <circle cx="50" cy="58" r="22"/>
+    <path d="M42 52 q8 -10 16 0 q8 10 -16 12 q-8 -2 0 -12 Z"/>
+    <circle cx="28" cy="17" r="2.4"/>
+    <circle cx="38" cy="17" r="2.4"/>
+    <g stroke="#C8322A" stroke-width="1.4">
+      <path d="M10 10 v80 M7 10 h6 M7 90 h6"/>
+    </g>
+  </svg>`,
+
+  silla: `<svg viewBox="0 0 80 100" fill="none" stroke="#6B6558" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 10 v34 h36 v-34"/>
+    <path d="M18 44 h44 v22 h-44 Z"/>
+    <path d="M22 66 l-6 26 M62 66 l6 26 M34 68 l-2 24 M50 68 l2 24"/>
+    <path d="M18 55 h44"/>
+    <g stroke="#C8322A" stroke-width="1.4">
+      <path d="M70 10 v34 M67 10 h6 M67 44 h6"/>
+    </g>
+  </svg>`,
+
+  cama: `<svg viewBox="0 0 120 100" fill="none" stroke="#6B6558" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 46 v40 M110 46 v40"/>
+    <path d="M10 60 h100 v14 h-100 Z"/>
+    <path d="M10 60 v-16 a6 6 0 0 1 6-6 h20 a6 6 0 0 1 6 6 v16"/>
+    <path d="M46 52 h58 v8 h-58 Z"/>
+    <g stroke="#C8322A" stroke-width="1.4">
+      <path d="M10 90 h100 M10 87 v6 M110 87 v6"/>
+    </g>
+  </svg>`,
+};
+
+function iconFor(cat){
+  return ICONS[cat] || ICONS.sofa;
+}
+
+</script>
+<script>
+(function(){
+  let activeCat = 'all';
+  let searchTerm = '';
+
+  const catList = document.getElementById('catList');
+  const grid = document.getElementById('productGrid');
+  const sectionTitle = document.getElementById('sectionTitle');
+  const crumbCat = document.getElementById('crumbCat');
+  const resultCount = document.getElementById('resultCount');
+  const searchInput = document.getElementById('searchInput');
+
+  const rulerIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16 L8 21 L21 8 L16 3 Z"/><path d="M8 8 l2 2 M11 5 l2 2 M14 2 l2 2"/></svg>`;
+  const arrowIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`;
+
+  function countFor(slug){
+    return PRODUCTS.filter(p => p.cat === slug).length;
+  }
+
+  function renderSidebar(){
+    let html = `<li class="cat-item ${activeCat==='all' ? 'active':''}">
+      <button data-cat="all"><span>Todo el catálogo</span><span class="count">${PRODUCTS.length}</span></button>
+    </li>`;
+    CATEGORIES.forEach(c=>{
+      html += `<li class="cat-item ${activeCat===c.slug ? 'active':''}">
+        <button data-cat="${c.slug}"><span>${c.name}</span><span class="count">${countFor(c.slug)}</span></button>
+      </li>`;
+    });
+    catList.innerHTML = html;
+
+    catList.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        activeCat = btn.dataset.cat;
+        renderSidebar();
+        renderGrid();
+      });
+    });
+  }
+
+  function getFiltered(){
+    return PRODUCTS.filter(p=>{
+      const matchesCat = activeCat === 'all' || p.cat === activeCat;
+      const term = searchTerm.trim().toLowerCase();
+      const matchesSearch = !term || (p.name.toLowerCase().includes(term) || p.desc.toLowerCase().includes(term));
+      return matchesCat && matchesSearch;
+    });
+  }
+
+  function catName(slug){
+    if(slug==='all') return 'Todo el catálogo';
+    const c = CATEGORIES.find(c=>c.slug===slug);
+    return c ? c.name : slug;
+  }
+
+  function renderGrid(){
+    const items = getFiltered();
+    sectionTitle.textContent = catName(activeCat);
+    crumbCat.textContent = catName(activeCat);
+    resultCount.textContent = items.length + (items.length === 1 ? ' artículo' : ' artículos');
+
+    if(items.length === 0){
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+        <div class="display">No encontramos artículos</div>
+        <div>Prueba con otra palabra o revisa otra categoría.</div>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = items.map(p => `
+      <div class="card" data-id="${p.id}">
+        <div class="card-art">
+          <span class="badge-new">${catName(p.cat)}</span>
+          ${iconFor(p.icon)}
+          <span class="dims-chip">${rulerIcon}${p.dims}</span>
+        </div>
+        <div class="card-body">
+          <div class="card-cat">${p.material.split(',')[0]}</div>
+          <div class="card-title">${p.name}</div>
+          <div class="card-desc">${p.desc}</div>
+          <div class="card-footer">
+            <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--grafito);">
+              <span class="avail-dot"></span>${p.avail}
+            </span>
+            <span class="ficha-link">Ver ficha ${arrowIcon}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('.card').forEach(card=>{
+      card.addEventListener('click', ()=> openModal(card.dataset.id));
+    });
+  }
+
+  // ===== Modal =====
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalArt = document.getElementById('modalArt');
+  const modalInfo = document.getElementById('modalInfo');
+  const modalClose = document.getElementById('modalClose');
+
+  function openModal(id){
+    const p = PRODUCTS.find(x=>x.id===id);
+    if(!p) return;
+
+    modalArt.innerHTML = iconFor(p.icon);
+
+    modalInfo.innerHTML = `
+      <div class="card-cat">${catName(p.cat)}</div>
+      <h3>${p.name}</h3>
+      <div class="spec-table">
+        <div class="spec-row"><span class="k">Medidas</span><span class="v">${p.dims}</span></div>
+        <div class="spec-row"><span class="k">Material</span><span class="v" style="font-family:'Inter',sans-serif;font-weight:600;text-align:right;">${p.material}</span></div>
+        <div class="spec-row"><span class="k">Colores disponibles</span><span class="v" style="font-family:'Inter',sans-serif;font-weight:600;text-align:right;">${p.colors.join(', ')}</span></div>
+        <div class="spec-row"><span class="k">Garantía</span><span class="v">${p.warranty}</span></div>
+        <div class="spec-row"><span class="k">Disponibilidad</span><span class="v" style="color:var(--verde-solano);">${p.avail}</span></div>
+      </div>
+      <p class="modal-desc">${p.desc}</p>
+      <div class="modal-cta">
+        <button class="btn btn-primary" type="button">Consultar en tienda</button>
+        <button class="btn btn-ghost" type="button">Agregar a favoritos</button>
+      </div>
+    `;
+
+    modalOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(){
+    modalOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  modalClose.addEventListener('click', closeModal);
+  modalOverlay.addEventListener('click', (e)=>{
+    if(e.target === modalOverlay) closeModal();
+  });
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape') closeModal();
+  });
+
+  // ===== Search =====
+  searchInput.addEventListener('input', (e)=>{
+    searchTerm = e.target.value;
+    renderGrid();
+  });
+
+  // ===== Init =====
+  renderSidebar();
+  renderGrid();
+})();
+
+</script>
+</body>
+</html>
